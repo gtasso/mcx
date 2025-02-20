@@ -1,0 +1,455 @@
+<style>
+/**
+ ========================
+   Core Layout & Variables 
+   ======================== 
+:root {
+  --primary-blue: #1a73e8;
+  --sidebar-width: 240px;
+  --header-height: 64px;
+  --expanded-margin: 30px;
+}
+**/
+
+/* ========================
+   Main Content Structure 
+   ======================== */
+
+.gc-main-content {
+  margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  padding: 20px;
+  margin-top: var(--header-height);
+  position: relative;
+  z-index: 1;
+}
+
+/*
+@media (max-width: 768px) {
+  .gc-main-content {
+    margin-left: 72px;
+    padding: 16px;
+  }
+}
+*/
+
+/* ========================
+   Class Cards & Grid 
+   ======================== */
+.gc-class-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.gc-class-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  height: 120px;
+  transition: all 0.3s ease;
+}
+
+.gc-class-card-header {
+  height: 80px;
+  padding: 16px;
+  color: white;
+  min-height: 80px;
+}
+
+.gc-class-card-header[data-color="blue"] { background: #1a73e8; }
+.gc-class-card-header[data-color="green"] { background: #0b9d58; }
+.gc-class-card-header[data-color="yellow"] { background: #f9ab00; }
+
+.gc-class-card-body {
+  padding: 16px;
+  transition: opacity 0.3s;
+  height: 100%;
+}
+
+/* ========================
+   Expanded View 
+   ======================== */
+.gc-expanded-view {
+  
+  position: fixed;
+  
+  top: calc(var(--header-height) + 10px);
+  left: var(--sidebar-width);
+  right: 0;
+  bottom: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+/*  max-width: 1000px; */
+  z-index: 1001;
+  background: white;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.gc-expanded-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative ;
+  
+}
+
+/**
+.gc-expanded-header {
+  padding: 2rem;
+  color: white;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  position: relative;
+  min-height: 150px;
+}
+**/
+
+.gc-expanded-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  min-height: 150px;
+}
+
+/**
+.expanded-menu-container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+}
+
+.expanded-menu-container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 100;
+  transform: none !important; 
+  margin-top: 0 !important;
+}
+**/
+/**
+.expanded-menu-container {
+  position: absolute;
+  top: 5px;
+  right: 0px;
+  z-index: 100;
+}
+**/
+/**
+.expanded-menu-container {
+  position: absolute !important;
+  top: 5px !important;
+  right: 0 !important;
+  z-index: 100 !important;
+}
+
+.expanded-menu-list {
+  position: absolute;
+  top: 100%; 
+  right: 0;
+}
+
+
+.expanded-menu-container .material-icons {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.expanded-menu-container .material-icons:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+**/
+/**
+.expanded-menu-list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  min-width: 160px;
+  margin-top: 8px;
+  transform-origin: top right;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+**/
+
+/**
+.expanded-menu-list.hidden {
+  opacity: 0;
+  transform: scale(0.8);
+  visibility: hidden;
+}
+
+.expanded-menu-list a {
+  display: block;
+  padding: 12px 16px;
+  color: #5f6368;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.expanded-menu-list a:hover {
+  background: #f8f9fa;
+  color: #1a73e8;
+}
+**/
+
+.expanded-menu-container {
+  position: absolute;
+  top: 5px;
+  right: 0;
+  z-index: 100;
+}
+
+.expanded-menu-container .material-icons {
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.expanded-menu-container .material-icons:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.expanded-menu-list {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  min-width: 160px;
+  transform-origin: top right;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.expanded-menu-list.hidden {
+  opacity: 0;
+  transform: scale(0.8);
+  visibility: hidden;
+}
+
+.expanded-menu-list a {
+  display: block;
+  padding: 12px 16px;
+  color: #5f6368;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.expanded-menu-list a:hover {
+  background: #f8f9fa;
+  color: #1a73e8;
+}
+
+#expandedClassName {
+  margin: 0;
+  padding: 0 60px; /* Space for side buttons */
+  max-width: calc(100% - 120px); /* Account for padding */
+  font-size: 2rem;
+  line-height: 1.2;
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: white;
+}
+
+/* Position other elements absolutely */
+/* .gc-expanded-header .expanded-menu-container,*/
+
+.gc-expanded-header .gc-expanded-back-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/*
+.gc-expanded-header .expanded-menu-container {
+  right: 20px;
+} */
+  
+.gc-expanded-header .gc-expanded-back-button {
+  left: 20px;
+}
+
+/* Responsive adjustments 
+@media (max-width: 600px) {
+  .expanded-menu-container {
+    top: 12px;
+    right: 12px;
+  }
+  */
+
+/**
+  .expanded-menu-list {
+    min-width: 140px;
+    font-size: 13px;
+  }
+}
+**/
+
+
+/* ========================
+   Modal & Dialog Styles 
+   ======================== */
+.gc-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1002;
+}
+
+.gc-modal.mdc-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  z-index: 100;
+}
+
+.gc-modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+  transform: scale(0.8);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.gc-modal.show .gc-modal-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* ========================
+   Material Design Overrides 
+   ======================== */
+.mdc-card {
+  padding: 0;
+  border-radius: 8px;
+}
+
+.mdc-text-field {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.mdc-button--raised {
+  background-color: var(--primary-blue);
+  color: white;
+}
+
+.mdc-text-field input:not(:focus):placeholder-shown + .mdc-notched-outline .mdc-floating-label {
+  transform: translateY(50%);
+  font-size: 1rem;
+}
+
+/* ========================
+   Utilities & States 
+   ======================== */
+.hidden {
+  opacity: 0 !important;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.mdc-button__label {
+  position: relative;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.button-text {
+  display: inline-block;
+}
+
+
+.gc-loading-spinner {
+  margin-left: 8px;
+  display: none;
+  width: 18px;
+  height: 18px;
+}
+
+.gc-spinner {
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+.gc-loading-spinner.hidden .button-text {
+  display: inline-block;
+}
+
+.gc-loading-spinner:not(.hidden) .button-text {
+  display: none;
+}
+.gc-loading-spinner.visible {
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========================
+   Toast Notifications 
+   ======================== */
+.gc-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a73e8;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 10000;
+}
+
+/* ========================
+   Empty/Loading States 
+   ======================== */
+.gc-empty-state,
+.gc-loading {
+  padding: 40px;
+  text-align: center;
+  color: #5f6368;
+  font-size: 1.2rem;
+}
+
+</style>
+

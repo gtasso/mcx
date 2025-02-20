@@ -1,0 +1,359 @@
+<html>
+<head>
+  <base target="_top">
+  <title>Classroom Clone</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+  <style>
+    :root {
+      --primary-blue: #1a73e8;
+      --header-height: 64px;
+      --sidebar-width: 130px;
+      --expanded-margin: 30px;
+    
+        }
+
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8f9fa;
+    }
+ </style>
+<script 
+  src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+
+  <?!= include('headercss')?>
+  <?!= include('sidebarcss')?>
+  <?!= include('maincss')?>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="gc-header">
+   
+  <div class="logo">
+    <span class="material-icons" style="font-size: 36px; color: var(--primary-blue);">
+      school
+    </span>
+    <span>MCX</span>
+    <span id="headerClassName" class="header-class-name"></span>
+  </div>
+
+  <div class="header-right">
+    <button class="gc-create-class" onclick="showCreateClassModal()" title="Create Class">
+      <span class="material-icons">add</span>
+    </button>
+    <div class="google-apps-menu" title="Google Apps" onclick="toggleAppsList()">
+      <span class="material-icons">apps</span>
+      <div class="google-apps-list" id="appsList">
+        <!-- ... apps list items ... -->
+        <a href="https://mail.google.com">Gmail</a>
+      </div>
+    </div>
+    <div class="user-avatar" id="userAvatar" title=""></div>
+  </div>
+</header>
+
+ 
+<nav class="gc-nav">
+  <!-- Existing Classes Menu -->
+
+  <div class="gc-nav-item active" id="classesNavItem">
+  <span class="material-icons">home</span>
+  Classes
+</div>
+
+  <!-- Curriculum Submenu -->
+  <div class="curriculum-submenu">
+    <div class="gc-nav-item">
+      <span class="material-icons">layers</span>
+      Strand
+    </div>
+    <div class="gc-nav-item">
+      <span class="material-icons">account_tree</span>
+      Sub-strand
+    </div>
+    <div class="gc-nav-item">
+      <span class="material-icons">assignment_turned_in</span>
+      SLO
+    </div>
+  </div>
+
+  <!-- Rest of navigation items -->
+</nav>
+
+  <!-- Main Content -->
+  <main class="gc-main-content">
+    <div class="gc-class-grid" id="classGrid">
+      <!-- Class cards will be loaded here -->
+    </div>
+  </main>
+
+<!--
+<div id="expandedView" class="gc-expanded-view hidden">
+  
+
+  <div class="gc-expanded-card">
+    
+    <div class="gc-expanded-header">
+      <button onclick="closeExpandedView()" class="gc-expanded-back-button" aria-label="Back to Classes">
+    <span class="material-icons" title="Back to Classes">arrow_back</span>
+  </button>
+
+      <h2 id="expandedClassName"></h2>
+    
+<!--
+<div class="expanded-menu-container">
+  <span class="material-icons" onclick="toggleExpandedMenu(event)">more_vert</span>
+  <div class="expanded-menu-list hidden" onclick="event.stopPropagation()">
+    <a href="javascript:void(0);"
+    id="archiveButton"
+
+       onclick="showArchiveConfirmation(currentExpandedClass?.classid)">
+      Archive
+    </a>
+  </div>
+  
+
+<div id="confirmationDialog" class="modal hidden">
+  <div class="modal-content">
+    <p>Are you sure you want to archive this class?</p>
+    <button id="confirmArchiveButton">Confirm</button>
+    <button onclick="hideArchiveConfirmation()">Cancel</button>
+  </div>
+</div>
+
+
+</div>
+    
+</div>
+
+
+    <div class="gc-expanded-body">
+      <div class="gc-expanded-details">
+        <p><strong>Subject:</strong> <span id="expandedSubject"></span></p>
+        <p><strong>Year Level:</strong> <span id="expandedYearlevel"></span></p>
+        <p><strong>Class ID:</strong> <span id="expandedClassId"></span></p>
+        <p><strong>Owner:</strong> <span id="expandedOwner"></span></p>
+        <p><strong>Created:</strong> <span id="expandedCreated"></span></p>
+      </div>
+    </div>
+  </div>
+</div>
+-->
+ <div id="expandedView" class="gc-expanded-view hidden">
+    <div class="gc-expanded-card">
+      <div class="gc-expanded-header">
+        <button onclick="closeExpandedView()" class="gc-expanded-back-button" aria-label="Back to Classes">
+          <span class="material-icons" title="Back to Classes">arrow_back</span>
+        </button>
+        <h2 id="expandedClassName"></h2>
+        <div class="expanded-menu-container">
+          <span class="material-icons" onclick="toggleExpandedMenu(event)">more_vert</span>
+          <div class="expanded-menu-list hidden" onclick="event.stopPropagation()">
+            <a href="javascript:void(0);" id="archiveButton">Archive</a>
+          </div>
+        </div>
+      </div>
+      <div class="gc-expanded-body">
+        <div class="gc-expanded-details">
+          <p><strong>Subject:</strong> <span id="expandedSubject"></span></p>
+          <p><strong>Year Level:</strong> <span id="expandedYearlevel"></span></p>
+          <p><strong>Class ID:</strong> <span id="expandedClassId"></span></p>
+          <p><strong>Owner:</strong> <span id="expandedOwner"></span></p>
+          <p><strong>Created:</strong> <span id="expandedCreated"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div id="archiveModal" class="gc-modal">
+  <div class="gc-modal-content">
+    <h2>Confirm Archive</h2>
+    <p>Are you sure you want to archive this class?</p>
+    <button id="confirmArchiveButton" class="mdc-button mdc-button--raised">Confirm</button>
+    <button class="mdc-button mdc-button--outlined" onclick="hideArchiveConfirmation()">Cancel</button>
+  </div>
+</div>
+
+
+<div id="createClassModal" class="gc-modal mdc-dialog">
+  <div class="mdc-card gc-modal-content mdc-dialog__surface">
+    <!-- Header -->
+    <div class="gc-modal-header mdc-dialog__header">
+      <h2 class="mdc-dialog__title mdc-typography--headline6">Create New Class</h2>
+      <button class="mdc-icon-button mdc-dialog__close" onclick="hideCreateClassModal()">
+        <span class="material-icons mdc-button__icon">close</span>
+      </button>
+    </div>
+
+    <!-- Body Content -->
+    <div class="gc-modal-body mdc-dialog__content">
+      <!-- Class Name Input -->
+      <div class="mdc-text-field mdc-text-field--outlined gc-form-group">
+        <input 
+          type="text" 
+          id="classNameInput" 
+          class="mdc-text-field__input" 
+          required
+          aria-labelledby="classNameLabel"
+          aria-describedby="classNameHelper"
+        >
+        <div class="mdc-notched-outline">
+          <div class="mdc-notched-outline__leading"></div>
+          <div class="mdc-notched-outline__notch">
+            <label id="classNameLabel" class="mdc-floating-label">Class Name</label>
+          </div>
+          <div class="mdc-notched-outline__trailing"></div>
+        </div>
+        <div class="mdc-text-field-helper-line">
+          <div id="classNameHelper" class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent">
+            Required field
+          </div>
+        </div>
+      </div>
+
+      <!-- Subject Input -->
+      <div class="mdc-text-field mdc-text-field--outlined gc-form-group">
+        <input 
+          type="text" 
+          id="classSubjectInput" 
+          class="mdc-text-field__input"
+          aria-labelledby="subjectLabel"
+          aria-describedby="subjectHelper"
+        >
+        <div class="mdc-notched-outline">
+          <div class="mdc-notched-outline__leading"></div>
+          <div class="mdc-notched-outline__notch">
+            <label id="subjectLabel" class="mdc-floating-label">Subject</label>
+          </div>
+          <div class="mdc-notched-outline__trailing"></div>
+        </div>
+        <div class="mdc-text-field-helper-line">
+          <div id="subjectHelper" class="mdc-text-field-helper-text mdc-text-field-helper-text--persistent">
+            E.g. Mathematics, Science
+          </div>
+        </div>
+      </div>
+
+      <!-- Year Level Select -->
+      <div class="mdc-select mdc-select--outlined gc-form-group">
+        <div class="mdc-select__anchor" role="combobox">
+          <span class="mdc-select__selected-text"></span>
+          <span class="mdc-select__dropdown-icon">
+            <svg class="mdc-select__dropdown-icon-graphic" viewBox="7 10 10 5">
+              <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+            </svg>
+          </span>
+          <!-- Add this hidden input -->
+          <input type="hidden" id="classYearlevelInput" name="yearlevel">
+          <div class="mdc-notched-outline">
+            <div class="mdc-notched-outline__leading"></div>
+            <div class="mdc-notched-outline__notch">
+              <label class="mdc-floating-label">Year Level</label>
+            </div>
+            <div class="mdc-notched-outline__trailing"></div>
+          </div>
+        </div>
+        <div class="mdc-select__menu mdc-menu mdc-menu-surface">
+          <ul class="mdc-list">
+            <option value="" disabled selected></option>
+            <? for (let i = 1; i <= 13; i++) { ?>
+              <li class="mdc-list-item" data-value="<?= i ?>">
+                <span class="mdc-list-item__ripple"></span>
+                <span class="mdc-list-item__text">Year <?= i ?></span>
+              </li>
+            <? } ?>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="gc-modal-footer mdc-dialog__actions">
+      
+      
+      <button 
+        class="mdc-button mdc-button--outlined"
+        onclick="hideCreateClassModal()"
+        type="button"
+      >
+        <span class="mdc-button__ripple"></span>
+        <span class="mdc-button__label">Cancel</span>
+      </button>
+      
+   
+<button 
+  class="mdc-button mdc-button--raised"
+  onclick="createClass()"
+  type="button"
+>
+  <span class="mdc-button__ripple"></span>
+  <span class="mdc-button__label">
+    <span class="button-text">Create Class</span>
+    <div class="gc-loading-spinner">
+      <div class="gc-spinner"></div>
+    </div>
+  </span>
+</button>
+
+    </div>
+  </div>
+  <div class="mdc-dialog__scrim"></div>
+</div>
+
+  <script>
+
+<?!= include('js/utilities');?>
+<?!= include('js/classOperations');?>
+<?!= include('js/uiHandlers'); ?>
+
+
+
+function toggleMenu(event) {
+  const menuList = event.currentTarget.querySelector('.menu-list');
+  menuList.style.display = menuList.style.display === 'block' ? 'none' : 'block';
+}
+
+/**
+// Function to archive a class
+function archiveClass(classId) {
+  alert(`Archiving class with ID: ${classId}`);  // Placeholder for actual archiving logic
+}
+**/
+
+
+ function toggleAppsList() {
+      const appsList = document.getElementById('appsList');
+      appsList.style.display = appsList.style.display === 'block' ? 'none' : 'block';
+    }
+
+
+// Add this function to handle outside clicks
+function handleClickOutside(event) {
+  const menuContainer = document.querySelector('.expanded-menu-container');
+  const menuList = menuContainer.querySelector('.expanded-menu-list');
+  
+  if (!menuContainer.contains(event.target)) {
+    menuList.classList.add('hidden');
+    document.removeEventListener('click', handleClickOutside);
+  }
+}
+
+
+  
+
+    // Close the apps list if the user clicks outside of it
+    window.addEventListener('click', function(event) {
+      const appsList = document.getElementById('appsList');
+      const appsMenu = document.querySelector('.google-apps-menu');
+      if (!appsMenu.contains(event.target)) { // Clicked outside the menu
+        appsList.style.display = 'none';
+      }
+    });
+
+
+  </script>
+</body>
+</html>

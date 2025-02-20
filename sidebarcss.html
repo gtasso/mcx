@@ -1,0 +1,62 @@
+<style>
+  .gc-nav {
+    width: var(--sidebar-width); 
+     /** width: 150px ; **/
+      height: calc(100vh - var(--header-height));
+      background: white;
+      padding: 20px 0;
+      position: fixed;
+      left: 0;
+      z-index: 999;
+      border: 2px solid red; 
+      transition: all 0.3s ease-in-out;
+      
+    }
+
+    .gc-nav-item {
+      padding: 12px 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .gc-nav-item:hover {
+      background: #f8f9fa;
+    }
+
+
+/* Icon Specific Styling */
+.gc-nav-item .material-icons {
+  font-size: 20px; /* Match existing icon size */
+  margin-right: 12px;
+}
+
+.curriculum-submenu {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+  transform: translateZ(0); /* Force hardware acceleration */
+}
+
+.gc-nav.expanded .curriculum-submenu {
+  max-height: 300px;
+  opacity: 1;
+  transition: all 0.3s ease-in-out 0.1s; /* Add slight delay */
+}
+
+
+/* second menu */
+
+/* Add visual hierarchy */
+.curriculum-submenu .gc-nav-item {
+  padding-left: 40px !important;
+  font-size: 0.9em;
+}
+
+.gc-nav-item.active {
+  background-color: rgba(0, 0, 0, 0.04);
+  border-left: 3px solid var(--primary-blue);
+}
+</style>

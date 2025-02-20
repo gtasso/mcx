@@ -1,0 +1,121 @@
+<script>
+/**
+function showArchiveConfirmation(classId) {
+  if (!classId) {
+    console.error('No class ID provided for archiving');
+    return;
+  }
+  
+  const modal = document.getElementById('archiveModal');
+  const confirmButton = document.getElementById('confirmArchiveButton');
+  
+  confirmButton.onclick = () => {
+    archiveClass(classId);
+    hideArchiveConfirmation();
+  };
+  
+  modal.style.display = 'flex';
+  setTimeout(() => modal.classList.add('show'), 10);
+}
+**/
+
+/**
+function archiveClass(classid) {
+  if (!confirm('Are you sure you want to archive this class?')) return;
+  
+  showLoadingSpinner();
+  
+  google.script.run
+    .withSuccessHandler(() => {
+      showToast('Class archived successfully!');
+      closeExpandedView();
+      loadClasses(); 
+      hideLoadingSpinner(); // Add this
+    })
+    .withFailureHandler(error => {
+      showToast('Archive failed: ' + error.message, 5000);
+      hideLoadingSpinner(); 
+    })
+    .archiveClass(classid);
+}
+**/
+// let pendingArchiveClassId = null;
+
+/**
+function showArchiveConfirmation(classId) {
+  console.log('Archive clicked for class:', classId);
+  pendingArchiveClassId = classId;
+  const modal = document.getElementById('archiveModal');
+  modal.style.display = 'flex';
+  setTimeout(() => modal.classList.add('show'), 10);
+}
+**/
+
+/**
+function hideArchiveConfirmation() {
+  const modal = document.getElementById('archiveModal');
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modal.style.display = 'none';
+    pendingArchiveClassId = null;
+  }, 300);
+}
+
+**/
+
+/**
+function handleArchiveConfirmation() {
+  console.log('Archiving class:', classIdToArchive);
+
+  if (!pendingArchiveClassId) return;
+
+  const button = document.getElementById('confirmArchiveButton');
+  const spinner = button.querySelector('.gc-loading-spinner');
+  
+  // Disable button and show spinner
+  button.disabled = true;
+  spinner.classList.remove('hidden');
+
+  // Store reference to current class ID
+  const classIdToArchive = pendingArchiveClassId;
+
+  // Clear pending ID immediately
+  pendingArchiveClassId = null;
+
+  // Success handler
+  const successHandler = () => {
+    resetCreateClassForm();
+    showToast('Class archived successfully');
+    hideArchiveConfirmation();
+    closeExpandedView();
+   loadClasses();
+    
+    // Cleanup
+    button.disabled = false;
+    spinner.classList.add('hidden');
+  };
+
+  // Failure handler
+  const failureHandler = (error) => {
+    showToast('Archive failed: ' + error.message, 5000);
+    
+    // Cleanup
+    button.disabled = false;
+    spinner.classList.add('hidden');
+  };
+
+  // Make the server call
+  google.script.run
+    .withSuccessHandler(successHandler)
+    .withFailureHandler(failureHandler)
+    .archiveClass(classIdToArchive);
+}
+
+**/
+
+ // Archive Click button
+ //  document.getElementById('archiveButton').addEventListener('click', handleArchiveConfirmation);
+
+
+
+</script>

@@ -1,0 +1,131 @@
+<html>
+<head>
+  <base target="_top">
+  <title>Classroom Clone</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css">
+  <style>
+    :root {
+      --primary-blue: #1a73e8;
+      --header-height: 64px;
+      --sidebar-width: 130px;
+      --expanded-margin: 30px;
+    }
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f8f9fa;
+    }
+  </style>
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  <?!= include('headercss')?>
+  <?!= include('sidebarcss')?>
+  <?!= include('maincss')?>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="gc-header">
+    <div class="logo">
+      <span class="material-icons" style="font-size: 36px; color: var(--primary-blue);">school</span>
+      <span>MCX</span>
+      <span id="headerClassName" class="header-class-name"></span>
+    </div>
+    <div class="header-right">
+      <button class="gc-create-class" onclick="showCreateClassModal()" title="Create Class">
+        <span class="material-icons">add</span>
+      </button>
+      <div class="google-apps-menu" title="Google Apps" onclick="toggleAppsList()">
+        <span class="material-icons">apps</span>
+        <div class="google-apps-list" id="appsList">
+          <a href="https://mail.google.com">Gmail</a>
+        </div>
+      </div>
+      <div class="user-avatar" id="userAvatar" title=""></div>
+    </div>
+  </header>
+
+  <nav class="gc-nav">
+    <div class="gc-nav-item active" id="classesNavItem">
+      <span class="material-icons">home</span>
+      Classes
+    </div>
+    <div class="curriculum-submenu">
+      <div class="gc-nav-item">
+        <span class="material-icons">layers</span>
+        Strand
+      </div>
+      <div class="gc-nav-item">
+        <span class="material-icons">account_tree</span>
+        Sub-strand
+      </div>
+      <div class="gc-nav-item">
+        <span class="material-icons">assignment_turned_in</span>
+        SLO
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="gc-main-content">
+    <div class="gc-class-grid" id="classGrid">
+      <!-- Class cards will be loaded here -->
+    </div>
+  </main>
+
+  <div id="expandedView" class="gc-expanded-view hidden">
+    <div class="gc-expanded-card">
+      <div class="gc-expanded-header">
+        <button onclick="closeExpandedView()" class="gc-expanded-back-button" aria-label="Back to Classes">
+          <span class="material-icons" title="Back to Classes">arrow_back</span>
+        </button>
+        <h2 id="expandedClassName"></h2>
+        <div class="expanded-menu-container">
+          <span class="material-icons" onclick="toggleExpandedMenu(event)">more_vert</span>
+          <div class="expanded-menu-list hidden" onclick="event.stopPropagation()">
+            <a href="javascript:void(0);" id="archiveButton">Archive</a>
+          </div>
+        </div>
+      </div>
+      <div class="gc-expanded-body">
+        <div class="gc-expanded-details">
+          <p><strong>Subject:</strong> <span id="expandedSubject"></span></p>
+          <p><strong>Year Level:</strong> <span id="expandedYearlevel"></span></p>
+          <p><strong>Class ID:</strong> <span id="expandedClassId"></span></p>
+          <p><strong>Owner:</strong> <span id="expandedOwner"></span></p>
+          <p><strong>Created:</strong> <span id="expandedCreated"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <div id="createClassModal" class="gc-modal mdc-dialog">
+    <!-- Modal content remains unchanged -->
+  </div>
+
+  <script>
+    <?!= include('js/utilities');?>
+    <?!= include('js/classOperations');?>
+    <?!= include('js/uiHandlers'); ?>
+    function toggleMenu(event) {
+      const menuList = event.currentTarget.querySelector('.menu-list');
+      menuList.style.display = menuList.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function toggleAppsList() {
+      const appsList = document.getElementById('appsList');
+      appsList.style.display = appsList.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Placeholder for toggleExpandedMenu function
+    function toggleExpandedMenu(event) {
+      event.stopPropagation();
+      const menuContainer = event.target.closest('.expanded-menu-container');
+      const menuList = menuContainer.querySelector('.expanded-menu-list');
+      menuList.classList.toggle('hidden');
+    }
+  </script>
+</body>
+</html>
