@@ -1,0 +1,45 @@
+// Handle all UI interactions
+document.addEventListener('DOMContentLoaded', () => {
+ console.log('ui starting');
+
+   // Initialize MDC components
+ // const yearLevelSelect = new mdc.select.MDCSelect(document.querySelector('.mdc-select'));
+ document.querySelectorAll('.mdc-text-field').forEach(field => {new mdc.textField.MDCTextField(field);
+  });
+  // archive
+  document.getElementById('archiveButton').addEventListener('click', showArchiveConfirmation);
+
+  // Optional: Handle value changes
+ // yearLevelSelect.listen('MDCSelect:change', () => {console.log('Selected:', yearLevelSelect.value);});
+  const yearSelect = new mdc.select.MDCSelect(document.querySelector('.mdc-select'));
+  yearSelect.listen('MDCSelect:change', () => {
+    document.getElementById('classYearlevelInput').value = yearSelect.value;
+  });
+
+  
+ 
+
+  // Menu/Button handlers
+  document.getElementById('classesNavItem').addEventListener('click', loadClasses);
+  document.querySelector('.gc-create-class').addEventListener('click', showCreateClassModal);
+  
+  // Apps menu toggle
+  document.querySelector('.google-apps-menu').addEventListener('click', toggleAppsList);
+  
+  // Close expanded view
+  document.querySelector('.gc-expanded-back-button').addEventListener('click', closeExpandedView);
+ console.log('before loadClases') ;
+// populateYearOptions() ;
+ loadClasses();
+ 
+  
+});
+
+// Export functions used in HTML attributes
+window.toggleAppsList = toggleAppsList;
+window.showCreateClassModal = showCreateClassModal;
+
+
+
+  
+

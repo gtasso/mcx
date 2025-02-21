@@ -1,0 +1,54 @@
+// Loading Spinner
+function showLoadingSpinner() {
+  const spinner = document.createElement('div');
+  spinner.id = 'gc-loading-spinner';
+  spinner.innerHTML = `
+    <div class="gc-spinner"></div>
+    <p>Archiving class...</p>
+  `;
+  document.body.appendChild(spinner);
+}
+
+function hideLoadingSpinner() {
+  const spinner = document.getElementById('gc-loading-spinner');
+  if (spinner) spinner.remove();
+}
+
+// Toast Notifications
+function showToast(message, duration = 3000) {
+  const toast = document.createElement('div');
+  toast.className = 'gc-toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, duration);
+}
+
+function initMDCComponents() {
+  // Initialize select
+  const yearSelect = new mdc.select.MDCSelect(document.querySelector('.mdc-select'));
+  yearSelect.listen('MDCSelect:change', () => {
+    document.getElementById('classYearlevelInput').value = yearSelect.value;
+  });
+}
+
+/**
+function populateYearOptions() {
+  const yearOptionsList = document.getElementById('yearOptionsList');
+  if (!yearOptionsList) return;
+
+  let html = '';
+  for (let i = 1; i <= 13; i++) {
+    html += `<li class="mdc-list-item" data-value="${i}">
+              <span class="mdc-list-item__ripple"></span>
+              <span class="mdc-list-item__text">Year ${i}</span>
+            </li>`;
+  }
+  yearOptionsList.innerHTML += html;
+}
+**/
+
+
+

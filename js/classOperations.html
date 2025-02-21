@@ -1,0 +1,571 @@
+function loadClasses() {
+  const classGrid = document.getElementById('classGrid');
+  classGrid.innerHTML = '<div class="gc-loading">Loading classes...</div>';
+
+  google.script.run
+    .withSuccessHandler(classes => {
+      if (classes.length === 0) {
+        classGrid.innerHTML = '<div class="gc-empty-state">No classes found. Create your first class!</div>';
+        return;
+      }
+
+      classGrid.innerHTML = '';
+      classes.forEach((cls, index) => {
+        const colors = ['blue', 'green', 'yellow'];
+        const color = colors[index % colors.length]; 
+        const classCard = document.createElement('div');
+        classCard.className = 'gc-class-card';
+        
+        classCard.innerHTML = `
+          <div class="gc-class-card-header" data-color="${color}">
+            <div class="gc-class-card-header-content">
+              <h3 class="gc-class-card-title">${cls.classname || 'Unnamed Class'}</h3>
+            </div>
+          </div>
+          <div class="gc-class-card-body">
+            <p>Subject: ${cls.subject || "Not specified"}</p>
+            <p>Year Level: ${cls.yearlevel || "Not specified"}</p>
+          </div>
+        `;
+        
+        classCard.dataset.classInfo = JSON.stringify(cls);
+
+        classCard.addEventListener('click', function(event) {
+          const clsData = JSON.parse(this.dataset.classInfo);
+          showExpandedView(event, clsData); 
+        });
+
+        classGrid.appendChild(classCard);
+      });
+    })
+    .withFailureHandler(error => {
+      classGrid.innerHTML = `<div class="gc-error">Error loading classes: ${error.message}</div>`;
+    })
+    .getClasses();
+}
+
+function createClass() {
+  console.log('Create class initiated');
+  const classNameInput = document.getElementById('classNameInput');
+  const classSubjectInput = document.getElementById('classSubjectInput');
+  const classYearlevelInput = document.getElementById('classYearlevelInput');
+
+  const createButton = document.querySelector('.mdc-button--raised');
+  const spinner = createButton.querySelector('.gc-loading-spinner');
+  const buttonText = createButton.querySelector('.button-text');
+
+  // Show spinner & disable button
+  createButton.disabled = true;
+  spinner.classList.add('visible');
+  spinner.classList.remove('hidden');
+  buttonText.style.display = 'none';
+  
+  const className = classNameInput.value.trim();
+  if (!className) {
+    showToast('Class name is required', 3000);
+    classNameInput.focus();
+    
+    // Restore button state immediately
+    createButton.disabled = false;
+    spinner.classList.add('hidden');
+    spinner.classList.remove('visible');
+    buttonText.style.display = 'inline-block';
+    
+    return;
+  }
+
+  const classData = {
+    name: className,
+    subject: classSubjectInput.value.trim(),
+    yearlevel: classYearlevelInput.value.trim()
+  };
+
+  const successHandler = () => {
+    console.log('Server responded successfully');
+
+    // Clear input fields
+    classNameInput.value = '';
+    classSubjectInput.value = '';
+    classYearlevelInput.value = '';
+    
+    hideCreateClassModal();
+    loadClasses();
+    showToast('Class created successfully!', 3000);
+    
+    // Restore button state
+    createButton.disabled = false;
+    spinner.classList.add('hidden');
+    spinner.classList.remove('visible'); 
+    buttonText.style.display = 'inline-block';
+    initMDCComponents();
+  };
+
+  const failureHandler = (error) => {
+    console.error('Error:', error);
+    showToast(error.message, 5000);
+    classNameInput.focus();
+    
+    // Restore button state
+    createButton.disabled = false;
+    spinner.classList.add('hidden');
+    spinner.classList.remove('visible'); 
+    buttonText.style.display = 'inline-block';
+  };
+
+  google.script.run
+    .withSuccessHandler(successHandler)
+    .withFailureHandler(failureHandler)
+    .createClass(classData);
+}
+
+function showCreateClassModal() {
+  const modal = document.getElementById('createClassModal');
+  modal.style.display = 'flex';
+  setTimeout(() => modal.classList.add('show'), 10);
+  initMDCComponents();
+}
+
+function hideCreateClassModal() {
+  const modal = document.getElementById('createClassModal');
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 300);
+}
+
+let currentExpandedClass = null;
+
+function showExpandedView(event, cls) {
+  console.log('Opening expanded view for:', cls?.classid);
+  currentExpandedClass = cls;
+  const createClassButton = document.querySelector('.gc-create-class');
+  if (createClassButton) {
+    createClassButton.style.display = 'none';
+  }
+
+  const activeCard = event.currentTarget.closest('.gc-class-card');
+  const expandedView = document.getElementById('expandedView');
+  const classGrid = document.getElementById('classGrid');
+
+  if (!activeCard || !expandedView || !classGrid) {
+    console.error("One or more required elements not found.");
+    return;
+  }
+
+  classGrid.style.opacity = '0.5';
+  expandedView.classList.remove('hidden');
+  expandedView.style.opacity = '0';
+
+  document.querySelectorAll('.gc-expanded-details span').forEach(el => {
+    if (el) {
+      el.textContent = '';
+    }
+  });
+
+  const header = activeCard.querySelector('.gc-class-card-header');
+  const color = header ? header.dataset.color : null;
+  console.log("Card color:", color);
+
+  const expandedHeader = document.querySelector('.gc-expanded-header');
+  if (expandedHeader) {
+    if (color) {
+      expandedHeader.style.backgroundColor = getComputedStyle(header).backgroundColor;
+    } else {
+      expandedHeader.style.backgroundColor = 'transparent';
+    }
+  } else {
+    console.error("Expanded header element not found.");
+  }
+
+  // Populate expanded view with class details
+  document.getElementById('expandedClassName').textContent = cls?.classname || 'Unnamed Class';
+  document.getElementById('expandedSubject').textContent = cls?.subject || 'Not specified';
+  document.getElementById('expandedYearlevel').textContent = cls?.yearlevel || 'Not specified';
+  document.getElementById('expandedClassId').textContent = cls?.classid || '';
+  document.getElementById('expandedOwner').textContent = cls?.owner || '';
+  document.getElementById('expandedCreated').textContent = cls?.created || '';
+
+  expandedView.style.transition = 'opacity 0.3s ease';
+  classGrid.style.transition = 'opacity 0.3s ease';
+
+  setTimeout(() => {
+    expandedView.style.opacity = '1';
+    classGrid.style.opacity = '1';
+  }, 10);
+
+  const nav = document.querySelector('.gc-nav');
+  if (nav) {
+    nav.classList.add('expanded');
+  } else {
+    console.error("Navigation element not found.");
+  }
+
+  // Ensure the menu is closed when a new class is expanded
+  const menuList = document.querySelector('.expanded-menu-list');
+  if (menuList) {
+    menuList.classList.add('hidden');
+  }
+}
+
+
+function closeExpandedView() {
+  document.querySelector('.gc-create-class').style.display = 'block';
+  const nav = document.querySelector('.gc-nav');
+  nav.style.opacity = '0.9';
+  
+  setTimeout(() => {
+    nav.classList.remove('expanded');
+    nav.style.opacity = '';
+    void nav.offsetHeight;
+  }, 300);
+ 
+  const classGrid = document.getElementById('classGrid');
+  const expandedView = document.getElementById('expandedView');
+  
+  document.querySelector('.gc-header').classList.remove('expanded');
+  document.getElementById('headerClassName').textContent = '';
+   
+  classGrid.style.display = 'grid';
+  classGrid.style.opacity = '0';
+
+  expandedView.style.opacity = '0';
+
+  // Close the archive menu
+  const menuList = document.querySelector('.expanded-menu-list');
+  if (menuList) {
+    menuList.classList.add('hidden');
+  }
+
+  setTimeout(() => {
+    expandedView.classList.add('hidden');
+    classGrid.style.opacity = '1';
+  }, 300);
+}
+
+
+function showArchiveConfirmation() {
+  if (!currentExpandedClass) return;
+  
+  const modal = document.getElementById('archiveModal');
+  if (!modal) {
+    console.error('Archive confirmation modal not found');
+    return;
+  }
+  
+  const confirmButton = document.getElementById('confirmArchiveButton');
+  confirmButton.onclick = () => {
+    archiveClass(currentExpandedClass.classid);
+    // hideArchiveConfirmation();
+    // Close the menu after confirmation
+    document.querySelector('.expanded-menu-list').classList.add('hidden');
+  };
+  
+  modal.style.display = 'flex';
+  setTimeout(() => modal.classList.add('show'), 10);
+}
+
+function hideArchiveConfirmation() {
+  const modal = document.getElementById('archiveModal');
+  if (!modal) return;
+  
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 300);
+}
+
+
+function archiveClass3(classid) {
+  if (!classid) {
+    console.error('No class ID provided for archiving');
+    return;
+  }
+
+  const modal = document.getElementById('archiveModal');
+  const confirmButton = document.getElementById('confirmArchiveButton');
+  const cancelButton = document.getElementById('archiveModal').querySelector('button[onclick*="hideArchiveConfirmation"]');
+  const spinner = confirmButton.querySelector('.gc-loading-spinner');
+  const buttonText = confirmButton.querySelector('.button-text');
+
+  // Show spinner, hide text, and disable buttons
+  confirmButton.disabled = true;
+  cancelButton.disabled = true;
+  if (spinner) {
+    spinner.classList.add('visible');
+    spinner.classList.remove('hidden');
+  }
+  if (buttonText) {
+    buttonText.style.display = 'none';
+  }
+
+  google.script.run
+    .withSuccessHandler(() => {
+      showToast('Class archived successfully');
+      
+      // After toast message, close modal and restore button states
+      setTimeout(() => {
+        hideArchiveConfirmation();
+        confirmButton.disabled = false;
+        cancelButton.disabled = false;
+        if (spinner) {
+          spinner.classList.add('hidden');
+          spinner.classList.remove('visible');
+        }
+        if (buttonText) {
+          buttonText.style.display = 'inline-block';
+        }
+      }, 2000); // Wait for 2 seconds for toast to be visible
+    })
+    .withFailureHandler(error => {
+      showToast('Archive failed: ' + error.message, 5000);
+      
+      // Restore button state on failure
+      confirmButton.disabled = false;
+      cancelButton.disabled = false;
+      if (spinner) {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('visible');
+      }
+      if (buttonText) {
+        buttonText.style.display = 'inline-block';
+      }
+    })
+    .archiveClass(classid);
+}
+
+function archiveClass5(classid) {
+  if (!classid) {
+    console.error('No class ID provided for archiving');
+    return;
+  }
+
+  const modal = document.getElementById('archiveModal');
+  const confirmButton = document.getElementById('confirmArchiveButton');
+  const cancelButton = modal.querySelector('button[onclick*="hideArchiveConfirmation"]');
+  const spinner = confirmButton.querySelector('.gc-loading-spinner');
+  const buttonText = confirmButton.querySelector('.button-text');
+
+  // Show spinner, hide text, and disable buttons
+  confirmButton.disabled = true;
+  if (cancelButton) {
+    cancelButton.disabled = true; // Disable cancel button if it exists
+  }
+  if (spinner) {
+    spinner.classList.add('visible');
+    spinner.classList.remove('hidden');
+  }
+  if (buttonText) {
+    buttonText.style.display = 'none';
+  }
+
+  google.script.run
+    .withSuccessHandler(() => {
+      showToast('Class archived successfully');
+      
+      // After toast message, close modal and restore button states
+      setTimeout(() => {
+        hideArchiveConfirmation(); // Close the confirmation modal
+        closeExpandedView(); // Close the expanded view
+        loadClasses(); // Refresh the class list
+        // Restore button state after success
+        confirmButton.disabled = false;
+        if (cancelButton) {
+          cancelButton.disabled = false;
+        }
+        if (spinner) {
+          spinner.classList.add('hidden');
+          spinner.classList.remove('visible');
+        }
+        if (buttonText) {
+          buttonText.style.display = 'inline-block';
+        }
+      }, 2000); // Wait for 2 seconds for toast to be visible
+    })
+    .withFailureHandler(error => {
+      showToast('Archive failed: ' + error.message, 5000);
+      
+      // On failure, keep modal open but restore button functionality
+      confirmButton.disabled = false;
+      if (cancelButton) {
+        cancelButton.disabled = false;
+      }
+      if (spinner) {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('visible');
+      }
+      if (buttonText) {
+        buttonText.style.display = 'inline-block';
+      }
+    })
+    .archiveClass(classid);
+}
+
+function archiveClass(classid) {
+  if (!classid) {
+    console.error('No class ID provided for archiving');
+    return;
+  }
+
+  const modal = document.getElementById('archiveModal');
+  const confirmButton = document.getElementById('confirmArchiveButton');
+  const cancelButton = modal.querySelector('button[onclick*="hideArchiveConfirmation"]');
+  const spinner = confirmButton.querySelector('.gc-loading-spinner');
+  const buttonText = confirmButton.querySelector('.button-text');
+
+  // Show spinner, hide text, and disable buttons
+  confirmButton.disabled = true;
+  if (cancelButton) {
+    cancelButton.disabled = true; // Disable cancel button if it exists
+  }
+  if (spinner) {
+    spinner.classList.add('visible');
+    spinner.classList.remove('hidden');
+  }
+  if (buttonText) {
+    buttonText.style.display = 'none';
+  }
+
+  google.script.run
+    .withSuccessHandler(() => {
+      showToast('Class archived successfully');
+      
+      // Keep the modal open until toast is shown
+      setTimeout(() => {
+        // Close the confirmation modal after toast message is shown
+        hideArchiveConfirmation();
+        // Close expanded view and refresh class list
+        closeExpandedView();
+        loadClasses();
+        // Restore button state after success
+        confirmButton.disabled = false;
+        if (cancelButton) {
+          cancelButton.disabled = false;
+        }
+        if (spinner) {
+          spinner.classList.add('hidden');
+          spinner.classList.remove('visible');
+        }
+        if (buttonText) {
+          buttonText.style.display = 'inline-block';
+        }
+      }, 2000); // Wait for 2 seconds for toast to be visible
+    })
+    .withFailureHandler(error => {
+      showToast('Archive failed: ' + error.message, 5000);
+      
+      // On failure, keep modal open but restore button functionality
+      confirmButton.disabled = false;
+      if (cancelButton) {
+        cancelButton.disabled = false;
+      }
+      if (spinner) {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('visible');
+      }
+      if (buttonText) {
+        buttonText.style.display = 'inline-block';
+      }
+    })
+    .archiveClass(classid);
+}
+
+function archiveClass1(classid) {
+  if (!classid) {
+    console.error('No class ID provided for archiving');
+    return;
+  }
+
+  const confirmButton = document.getElementById('confirmArchiveButton');
+  const spinner = confirmButton.querySelector('.gc-loading-spinner');
+  const buttonText = confirmButton.querySelector('.button-text');
+
+  // Show spinner & disable button
+  confirmButton.disabled = true;
+  if (spinner) {
+    spinner.classList.add('visible');
+    spinner.classList.remove('hidden');
+  }
+  if (buttonText) {
+    buttonText.style.display = 'none';
+  }
+
+  google.script.run
+    .withSuccessHandler(() => {
+      showToast('Class archived successfully');
+      closeExpandedView();
+      loadClasses(); 
+      // Restore button state after success
+      confirmButton.disabled = false;
+      if (spinner) {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('visible');
+      }
+      if (buttonText) {
+        buttonText.style.display = 'inline-block';
+      }
+    })
+    .withFailureHandler(error => {
+      showToast('Archive failed: ' + error.message, 5000);
+      // Restore button state on failure
+      confirmButton.disabled = false;
+      if (spinner) {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('visible');
+      }
+      if (buttonText) {
+        buttonText.style.display = 'inline-block';
+      }
+    })
+    .archiveClass(classid);
+}
+
+
+function resetCreateClassForm() {
+  // Clear text fields
+  document.getElementById('classNameInput').value = '';
+  document.getElementById('classSubjectInput').value = '';
+  
+  // Reset MDC text field states
+  const textFields = document.querySelectorAll('.mdc-text-field');
+  textFields.forEach(field => {
+    field.classList.remove('mdc-text-field--focused');
+    const label = field.querySelector('.mdc-floating-label');
+    label.classList.remove('mdc-floating-label--float-above');
+  });
+
+  // Reset select component
+  const select = document.querySelector('.mdc-select');
+  if (select) {
+    const mdcSelect = new mdc.select.MDCSelect(select);
+    mdcSelect.selectedIndex = -1; 
+    mdcSelect.value = '';
+    document.getElementById('classYearlevelInput').value = '';
+  }
+}
+
+function toggleMenu(event) {
+      const menuList = event.currentTarget.querySelector('.menu-list');
+      menuList.style.display = menuList.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function toggleAppsList() {
+      const appsList = document.getElementById('appsList');
+      appsList.style.display = appsList.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Placeholder for toggleExpandedMenu function
+    function toggleExpandedMenu(event) {
+      event.stopPropagation();
+      const menuContainer = event.target.closest('.expanded-menu-container');
+      const menuList = menuContainer.querySelector('.expanded-menu-list');
+      menuList.classList.toggle('hidden');
+    }
+
+// Export functions to global scope
+window.loadClasses = loadClasses;
+window.showExpandedView = showExpandedView;
+window.closeExpandedView = closeExpandedView ;
+window.showArchiveConfirmation = showArchiveConfirmation;
+window.hideArchiveConfirmation = hideArchiveConfirmation ;
+window.createClass = createClass ;
+window.archiveClass = archiveClass ;
