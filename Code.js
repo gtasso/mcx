@@ -4,7 +4,7 @@ const classSs = SpreadsheetApp.openById(PropertiesService.getScriptProperties().
 
 function doGet() {
   // return HtmlService.createHtmlOutputFromFile('Index')
-  return HtmlService.createTemplateFromFile('Index')
+  return HtmlService.createTemplateFromFile('index')
 
     .evaluate()
     .setTitle('Classroom Clone')
