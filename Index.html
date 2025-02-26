@@ -16,30 +16,6 @@
       font-family: 'Roboto', sans-serif;
       background-color: #f8f9fa;
     }
-    .user-avatar img {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    .user-menu {
-      position: absolute;
-      top: 100%;
-      right: 0;
-      background: white;
-      border-radius: 4px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      display: none;
-    }
-    .user-menu a {
-      display: block;
-      padding: 8px 16px;
-      color: #5f6368;
-      text-decoration: none;
-    }
-    .user-menu a:hover {
-      background: #f8f9fa;
-    }
   </style>
   <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
   <?!= include('headercss')?>
@@ -65,16 +41,7 @@
           <a href="https://mail.google.com">Gmail</a>
         </div>
       </div>
-      <div class="user-avatar" id="userAvatar" onclick="toggleUserMenu()">
-        <? if (user) { ?>
-          <img src="<?= user.picture ?>" alt="User Avatar" title="<?= user.name ?>">
-          <div class="user-menu" id="userMenu">
-            <a href="#" onclick="logout()">Logout</a>
-          </div>
-        <? } else { ?>
-          <span class="material-icons">account_circle</span>
-        <? } ?>
-      </div>
+      <div class="user-avatar" id="userAvatar" title=""></div>
     </div>
   </header>
 
@@ -108,32 +75,6 @@
   </main>
 
   <script>
-    <? if (!user) { ?>
-      google.script.run.withSuccessHandler(function(url) {
-        if (url) {
-          window.location.href = url; // Redirect to Google login
-        }
-      }).getOAuthUrl();
-    <? } else { ?>
-      document.getElementById('userAvatar').title = '<?= user.name ?>';
-      console.log('User logged in:', '<?= user.email ?>');
-    <? } ?>
-
-    function toggleUserMenu() {
-      const menu = document.getElementById('userMenu');
-      if (menu) {
-        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-      }
-    }
-
-    function logout() {
-      google.script.run
-        .withSuccessHandler(function() {
-          window.location.reload(); // Reload to show login page
-        })
-        .logout();
-    }
-
     <?!= include('js/utilities');?>
     <?!= include('js/classOperations');?>
     <?!= include('js/uiHandlers'); ?>

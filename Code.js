@@ -2,99 +2,188 @@ const classSs = SpreadsheetApp.openById(PropertiesService.getScriptProperties().
 const year13Ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('MCX_YEAR13_SPREADSHEET_ID'));
 
 // OAuth Configuration
-const CLIENT_ID = '71193847134-k94t3noiddcoikrvaviua3m3ppjg9uol.apps.googleusercontent.com'; // Replace with your Client ID from OAuth credentials
+const CLIENT_ID = '71193847134-k94t3noiddcoikrvaviua3m3ppjg9uol.apps.googleusercontent.com'; // Replace with your Client ID fr
 const CLIENT_SECRET = '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'; // Replace with your Client Secret
 const REDIRECT_URI = ScriptApp.getService().getUrl(); // Apps Script URL as redirect URI
 
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
+}
 
-function doGet(e) {
-  console.log('doGet called with parameters:', JSON.stringify(e.parameter));
-  const user = getCurrentUser();
-  console.log('Current user:', user ? JSON.stringify(user) : 'No user');
-  if (!user) {
-    console.log('User not authenticated, serving login.html');
+
+function doGet2() {
+  var service = getOAuthService();
+
+  if (!service.hasAccess()) {
+    console.log('User not authenticated, loading login.html');
     return HtmlService.createTemplateFromFile('login')
       .evaluate()
-      .setTitle('MCX - Login')
+      .setTitle('Login - MCX')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
   }
 
-  console.log('User authenticated, serving index.html');
-  const template = HtmlService.createTemplateFromFile('index');
-  template.user = user;
-  return template
+  var token = service.getAccessToken();
+  var userInfo = getUserInfo(token);
+
+  console.log('User authenticated:', userInfo.email);
+
+  return HtmlService.createTemplateFromFile('index')
     .evaluate()
-    .setTitle('MCX')
+    .setTitle('MCX - Dashboard')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 
-function getOAuthUrl() {
-  const service = getOAuthService();
-  console.log('getOAuthUrl called, hasAccess:', service.hasAccess());
-  if (service.hasAccess()) {
-    console.log('User already has access, returning null');
-    return null;
-  }
-  const url = service.getAuthorizationUrl();
-  console.log('Generated OAuth URL:', url);
-  return url;
+
+function doGet6() {
+  var service = getOAuthService();
+
+  if (!service.hasAccess()) {
+    var authUrl = service.getAuthorizationUrl();
+    return HtmlService.createHtmlOutput(`
+      <script>
+        function login() {
+          window.open("${authUrl}", "_blank", "width=500,height=600");
+        }
+      </script>
+      <button onclick="login()">Login with Google</button>
+    `);
+  } else {
+
+  var token = service.getAccessToken();
+  var userInfo = getUserInfo(token);
+
+  return HtmlService.createHtmlOutput(`
+    <h2>Welcome, ${userInfo.name}!</h2>
+    <p>Email: ${userInfo.email}</p>
+    <img src="${userInfo.picture}" width="100">
+    <br><a href="?logout=true">Logout</a>
+  `);
+}
 }
 
-function getOAuthService() {
-  return OAuth2.createService('google')
-    .setAuthorizationBaseUrl('https://accounts.google.com/o/oauth2/auth')
-    .setTokenUrl('https://oauth2.googleapis.com/token')
-    .setClientId(CLIENT_ID)
-    .setClientSecret(CLIENT_SECRET)
-    .setCallbackFunction('authCallback') // Required for library-managed callback
-    .setPropertyStore(PropertiesService.getUserProperties())
-    .setScope('https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile')
-    .setParam('access_type', 'offline')
-    .setParam('prompt', 'consent');
+
+
+function doGet4() {
+  var service = getOAuthService();
+
+  if (!service.hasAccess()) {
+    console.log('User not authenticated, loading Login');
+var authUrl = service.getAuthorizationUrl();
+    return HtmlService.createHtmlOutput(`
+      <script>
+        function login() {
+          window.open("${authUrl}", "_blank", "width=500,height=600");
+        }
+      </script>
+      <button onclick="login()">Login with Google</button>
+    `);
+  }
+    
+
+   else {
+    console.log('User authenticated, loading index.html');
+    return HtmlService.createTemplateFromFile('index')
+      .evaluate()
+      .setTitle('MCX - Dashboard')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  }
+}
+
+function doGet() {
+  var service = getOAuthService();
+
+  if (!service.hasAccess()) {
+        console.log('User not authenticated, loading Login');
+var authUrl = service.getAuthorizationUrl();
+    return HtmlService.createHtmlOutput(`
+      <script>
+        function login() {
+          window.open("${authUrl}", "_blank", "width=500,height=600");
+        }
+      </script>
+      <button onclick="login()">Login with Google</button>
+    `);
+ 
+  }
+
+  // User is authenticated, load dashboard
+  var token = service.getAccessToken();
+  var userInfo = getUserInfo(token);
+  
+  console.log('User authenticated:', userInfo.email);
+
+  return HtmlService.createTemplateFromFile('index')
+    .evaluate()
+    .setTitle('MCX - Dashboard')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function getUserInfo(token) {
+  var url = "https://www.googleapis.com/oauth2/v2/userinfo";
+  var response = UrlFetchApp.fetch(url, {
+    headers: { Authorization: "Bearer " + token },
+    muteHttpExceptions: true
+  });
+
+  return JSON.parse(response.getContentText());
 }
 
 function authCallback(request) {
-  console.log('authCallback called with request:', JSON.stringify(request));
-  const service = getOAuthService();
-  const isAuthorized = service.handleCallback(request);
-  console.log('Authorization result:', isAuthorized);
-  if (isAuthorized) {
-    const redirectUrl = ScriptApp.getService().getUrl();
-    console.log('Redirecting to:', redirectUrl);
-    return HtmlService.createHtmlOutput('<script>window.top.location.href="' + redirectUrl + '";</script>');
+  var service = getOAuthService();
+  var authorized = service.handleCallback(request);
+
+  if (authorized) {
+    return HtmlService.createHtmlOutput("Success! You can close this window.");
   } else {
-    console.error('Authorization failed');
-    return HtmlService.createHtmlOutput('Authorization failed. Please try again.');
+    return HtmlService.createHtmlOutput("Authorization failed.");
   }
 }
 
-function getCurrentUser() {
-  const service = getOAuthService();
+function getOAuthService() {
+  return OAuth2.createService("GoogleLogin")
+    .setAuthorizationBaseUrl("https://accounts.google.com/o/oauth2/auth")
+    .setTokenUrl("https://oauth2.googleapis.com/token")
+    .setClientId(CLIENT_ID)
+    .setClientSecret(CLIENT_SECRET)
+    .setCallbackFunction("authCallback")
+    .setPropertyStore(PropertiesService.getUserProperties())
+    .setScope("https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email")
+    .setParam("access_type", "offline");
+}
+
+function getOAuthUrl() {
+  var service = getOAuthService();
   if (!service.hasAccess()) {
-    return null;
+    return service.getAuthorizationUrl();
   }
+  return null; // Already authenticated, no need for login
+}
 
-  const url = 'https://www.googleapis.com/oauth2/v2/userinfo';
-  const response = UrlFetchApp.fetch(url, {
-    headers: {
-      Authorization: 'Bearer ' + service.getAccessToken()
-    }
-  });
 
-  const userInfo = JSON.parse(response.getContentText());
+
+function logout() {
+  getOAuthService().reset();
+}
+
+function getCurrentUser() {
+  // const user = Session.getActiveUser(); // Get the User object
+  const email = Session.getActiveUser().getEmail();
+  const user = AdminDirectory.Users.get(email);
+
+ // let userName = user.getNickname() || user.getEmail(); // Preferred: Nickname or email fallback
+
+  // OR, if you want to try given/family name (may be empty or unavailable):
+  //  let userName = user.getGivenName() || "" + " " + user.getFamilyName() || user.getNickname() || user.getEmail();
+// let userName = user.getGivenName() ;
+
   return {
-    email: userInfo.email,
-    name: userInfo.name || userInfo.email.split('@')[0],
-    picture: userInfo.picture,
+    email: email,
+    name: user.name.fullName ,
     role: 'teacher'
   };
 }
 
-function logout() {
-  const service = getOAuthService();
-  service.reset();
-  return true;
-}
+
 
 // Existing Functions (unchanged unless noted)
 function generateYearOptions() {
