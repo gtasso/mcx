@@ -9,7 +9,7 @@ const REDIRECT_URI = ScriptApp.getService().getUrl(); // Apps Script URL as redi
 
 function doGet(e) {
   console.log('doGet called with parameters:', JSON.stringify(e.parameter));
-  const user = getCurrentUser();
+  const user = getCurrentUser);
   console.log('Current user:', user ? JSON.stringify(user) : 'No user');
   if (!user) {
     console.log('User not authenticated, serving login.html');
@@ -68,7 +68,7 @@ function authCallback(request) {
   }
 }
 
-function getCurrentUser() {
+function getCurentUser() {
   const service = getOAuthService();
   if (!service.hasAccess()) {
     return null;

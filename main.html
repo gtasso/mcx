@@ -66,59 +66,93 @@
           </div>
         </div>
 
-        <!-- Year Level Select -->
-        <div class="mdc-select mdc-select--outlined gc-form-group">
-          <div class="mdc-select__anchor" role="combobox">
+ 
+	  <!-- MDC Select Container -->
+    <div class="mdc-select mdc-select--filled">
+        <div class="mdc-select__anchor">
+            <span class="mdc-select__ripple"></span>
             <span class="mdc-select__selected-text"></span>
             <span class="mdc-select__dropdown-icon">
-              <svg class="mdc-select__dropdown-icon-graphic" viewBox="7 10 10 5">
-                <path fill="currentColor" d="M7 10l5 5 5-5z"/>
-              </svg>
+                <svg class="mdc-select__dropdown-icon-graphic" viewBox="7 10 10 5">
+                    <polygon class="mdc-select__dropdown-icon-inactive"
+                    stroke="none" fill-rule="evenodd" points="7 10 12
+                    15 17 10"></polygon>
+                    <polygon class="mdc-select__dropdown-icon-active"
+                    stroke="none" fill-rule="evenodd" points="7 15 12
+                    10 17 15"></polygon>
+                </svg>
             </span>
-            <input type="hidden" id="classYearlevelInput" name="yearlevel">
-            <div class="mdc-notched-outline">
-              <div class="mdc-notched-outline__leading"></div>
-              <div class="mdc-notched-outline__notch">
-                <label class="mdc-floating-label">Year Level</label>
-              </div>
-              <div class="mdc-notched-outline__trailing"></div>
-            </div>
-          </div>
-          
-          <!--
-          <div class="mdc-select__menu mdc-menu mdc-menu-surface">
-            <ul class="mdc-list">
-              <option value="" disabled selected></option>
-              <? for (let i = 1; i <= 13; i++) { ?>
-                <li class="mdc-list-item" data-value="<?= i ?>">
-                  <span class="mdc-list-item__ripple"></span>
-                  <span class="mdc-list-item__text">Year <?= i ?></span>
-                </li>
-              <? } ?>
-            </ul>
-          </div>
-          -->
-          <div class="mdc-select__menu mdc-menu mdc-menu-surface">
-            <ul class="mdc-list">
-              <li class="mdc-list-item" data-value="" disabled selected>
-              <span class="mdc-list-item__ripple"></span>
-              <span class="mdc-list-item__text">Select Year</span>
-              </li>
-                <?!= generateYearOptions() ?>
-            </ul>
-          </div>
+	    <input type="hidden" id="classYearlevelInput" name="yearlevel">
+            <span class="mdc-floating-label">Select Year</span>
+            <span class="mdc-line-ripple"></span>
         </div>
-        
-        <!--
+
+        <!-- Dropdown Menu -->
         <div class="mdc-select__menu mdc-menu mdc-menu-surface">
-          <ul class="mdc-list" id="yearOptionsList">
-            <option value="" disabled selected></option>
-          </ul>
+            <ul class="mdc-list">
+                <!-- Placeholder Option -->
+                <li class="mdc-list-item mdc-list-item--disabled" data-value="" aria-selected="true" selected>
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">Select
+                    Year</span>
+                </li>
+                <!-- Year Options -->
+                <li class="mdc-list-item" data-value="1">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">1</span>
+                </li>
+                <li class="mdc-list-item" data-value="2">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">2</span>
+                </li>
+                <li class="mdc-list-item" data-value="3">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">3</span>
+                </li>
+		 <li class="mdc-list-item" data-value="4">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">4</span>
+                 </li>
+		  <li class="mdc-list-item" data-value="5">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">5</span>
+                  </li>
+		   <li class="mdc-list-item" data-value="6">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">6</span>
+                   </li>
+		    <li class="mdc-list-item" data-value="7">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">7</span>
+                    </li>
+		     <li class="mdc-list-item" data-value="8">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">8</span>
+                     </li>
+		      <li class="mdc-list-item" data-value="year9">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">9</span>
+                      </li>
+		       <li class="mdc-list-item" data-value="10">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">10</span>
+                       </li>
+		      <li class="mdc-list-item" data-value="11">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">11</span>
+                      </li>
+		       <li class="mdc-list-item" data-value="12">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">12</span>
+                       </li>
+		        <li class="mdc-list-item" data-value="13">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">13</span>
+                </li>
+            </ul>
         </div>
-        -->
-
-      
-
+    </div>
+ 
       <!-- Footer Actions -->
       <div class="gc-modal-footer mdc-dialog__actions">
         <button class="mdc-button mdc-button--outlined" onclick="hideCreateClassModal()" type="button">

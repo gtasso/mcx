@@ -1,45 +1,41 @@
-// Handle all UI interactions
+
+  
 document.addEventListener('DOMContentLoaded', () => {
- console.log('ui starting');
+    console.log('ui starting');
 
-   // Initialize MDC components
- // const yearLevelSelect = new mdc.select.MDCSelect(document.querySelector('.mdc-select'));
- document.querySelectorAll('.mdc-text-field').forEach(field => {new mdc.textField.MDCTextField(field);
-  });
-  // archive
-  document.getElementById('archiveButton').addEventListener('click', showArchiveConfirmation);
+    // Initialize MDC components
+    const select = new mdc.select.MDCSelect(document.querySelector('.mdc-select'));
+    document.querySelectorAll('.mdc-text-field').forEach(field => {
+        new mdc.textField.MDCTextField(field);
+    });
+    // archive
+    document.getElementById('archiveButton').addEventListener('click', showArchiveConfirmation);
 
-  // Optional: Handle value changes
- // yearLevelSelect.listen('MDCSelect:change', () => {console.log('Selected:', yearLevelSelect.value);});
-  const yearSelect = new mdc.select.MDCSelect(document.querySelector('.mdc-select'));
-  yearSelect.listen('MDCSelect:change', () => {
-    document.getElementById('classYearlevelInput').value = yearSelect.value;
-  });
+    // Handle value changes with improved listener
+    const inputField = document.getElementById('classYearlevelInput');
+    if (inputField) {
+        inputField.value = select.value; // Set initial value
+        select.listen('MDCSelect:change', () => {
+            inputField.value = select.value; // Update on change
+        });
+    } else {
+        console.error('Input field not found');
+    }
 
-  
- 
+    // Menu/Button handlers
+    document.getElementById('classesNavItem').addEventListener('click', loadClasses);
+    document.querySelector('.gc-create-class').addEventListener('click', showCreateClassModal);
 
-  // Menu/Button handlers
-  document.getElementById('classesNavItem').addEventListener('click', loadClasses);
-  document.querySelector('.gc-create-class').addEventListener('click', showCreateClassModal);
-  
-  // Apps menu toggle
-  document.querySelector('.google-apps-menu').addEventListener('click', toggleAppsList);
-  
-  // Close expanded view
-  document.querySelector('.gc-expanded-back-button').addEventListener('click', closeExpandedView);
- console.log('before loadClases') ;
-// populateYearOptions() ;
- loadClasses();
- 
-  
+    // Apps menu toggle
+    document.querySelector('.google-apps-menu').addEventListener('click', toggleAppsList);
+
+    // Close expanded view
+    document.querySelector('.gc-expanded-back-button').addEventListener('click', closeExpandedView);
+    console.log('before loadClasses');
+    // populateYearOptions();
+    loadClasses();
 });
 
 // Export functions used in HTML attributes
 window.toggleAppsList = toggleAppsList;
 window.showCreateClassModal = showCreateClassModal;
-
-
-
-  
-

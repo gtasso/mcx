@@ -1,3 +1,4 @@
+
 function loadClasses() {
   const classGrid = document.getElementById('classGrid');
   classGrid.innerHTML = '<div class="gc-loading">Loading classes...</div>';
@@ -44,79 +45,50 @@ function loadClasses() {
     .getClasses();
 }
 
-function loadSlo3() {
-  if (!currentExpandedClass || !currentExpandedClass.classid) {
-    console.error('No class selected to load SLOs');
-    return;
-  }
-
-  const expandedViewBody = document.querySelector('.gc-expanded-body');
-  if (!expandedViewBody) {
-    console.error('Expanded view body not found');
-    return;
-  }
-
-  expandedViewBody.innerHTML = '<div class="gc-loading">Loading SLOs...</div>';
-
-  google.script.run
-    .withSuccessHandler(slos => {
-      if (!slos || slos.length === 0) {
-        expandedViewBody.innerHTML = '<div class="gc-empty-state">No SLOs found for this class.</div>';
-        return;
-      }
-
-      expandedViewBody.innerHTML = '<ul class="gc-slo-list"></ul>';
-      const sloList = expandedViewBody.querySelector('.gc-slo-list');
-      
-      slos.forEach(slo => {
-        const sloItem = document.createElement('li');
-        sloItem.className = 'gc-slo-item';
-          sloItem.textContent = slo.slocode || 'Unnamed SLO';
-	  sloItem.textContent = slo.slo || 'Unnamed SLO';
-	  
-        sloList.appendChild(sloItem);
-      });
-    })
-    .withFailureHandler(error => {
-      expandedViewBody.innerHTML = `<div class="gc-error">Error loading SLOs: ${error.message}</div>`;
-    })
-    .getSlo(currentExpandedClass.classid);
-}
 function loadSlo() {
-  if (!currentExpandedClass || !currentExpandedClass.classid) {
-    console.error('No class selected to load SLOs');
-    return;
-  }
-
-  const expandedViewBody = document.querySelector('.gc-expanded-body');
-  if (!expandedViewBody) {
-    console.error('Expanded view body not found');
-    return;
-  }
-
-  expandedViewBody.innerHTML = '<div class="gc-loading">Loading SLOs...</div>';
+  const classGrid = document.getElementById('classGrid');
+  classGrid.innerHTML = '<div class="gc-loading">Loading classes...</div>';
 
   google.script.run
-    .withSuccessHandler(slos => {
-      if (!slos || slos.length === 0) {
-        expandedViewBody.innerHTML = '<div class="gc-empty-state">No SLOs found for this class.</div>';
+    .withSuccessHandler(classes => {
+      if (classes.length === 0) {
+        classGrid.innerHTML = '<div class="gc-empty-state">No classes found. Create your first class!</div>';
         return;
       }
 
-      expandedViewBody.innerHTML = '<ul class="gc-slo-list"></ul>';
-      const sloList = expandedViewBody.querySelector('.gc-slo-list');
-      
-      slos.forEach(slo => {
-        const sloItem = document.createElement('li');
-        sloItem.className = 'gc-slo-item';
-        sloItem.textContent = `${slo.slocode || 'Unnamed SLO'} - ${slo.slo || 'Unnamed SLO'}`;
-        sloList.appendChild(sloItem);
+      classGrid.innerHTML = '';
+      classes.forEach((cls, index) => {
+        const colors = ['blue', 'green', 'yellow'];
+        const color = colors[index % colors.length]; 
+        const classCard = document.createElement('div');
+        classCard.className = 'gc-class-card';
+        
+        classCard.innerHTML = `
+          <div class="gc-class-card-header" data-color="${color}">
+            <div class="gc-class-card-header-content">
+              <h3 class="gc-class-card-title">${cls.classname || 'Unnamed Class'}</h3>
+            </div>
+          </div>
+          <div class="gc-class-card-body">
+            <p>Subject: ${cls.subject || "Not specified"}</p>
+            <p>Year Level: ${cls.yearlevel || "Not specified"}</p>
+          </div>
+        `;
+        
+        classCard.dataset.classInfo = JSON.stringify(cls);
+
+        classCard.addEventListener('click', function(event) {
+          const clsData = JSON.parse(this.dataset.classInfo);
+          showExpandedView(event, clsData); 
+        });
+
+        classGrid.appendChild(classCard);
       });
     })
     .withFailureHandler(error => {
-      expandedViewBody.innerHTML = `<div class="gc-error">Error loading SLOs: ${error.message}</div>`;
+      classGrid.innerHTML = `<div class="gc-error">Error loading classes: ${error.message}</div>`;
     })
-    .getSlo(currentExpandedClass.classid);
+    .getSlo();
 }
 	  
 function createClass() {
@@ -129,6 +101,7 @@ function createClass() {
   const spinner = createButton.querySelector('.gc-loading-spinner');
   const buttonText = createButton.querySelector('.button-text');
 
+  // Show spinner & disable button
   createButton.disabled = true;
   spinner.classList.add('visible');
   spinner.classList.remove('hidden');
@@ -138,10 +111,13 @@ function createClass() {
   if (!className) {
     showToast('Class name is required', 3000);
     classNameInput.focus();
+    
+    // Restore button state immediately
     createButton.disabled = false;
     spinner.classList.add('hidden');
     spinner.classList.remove('visible');
     buttonText.style.display = 'inline-block';
+    
     return;
   }
 
@@ -153,12 +129,17 @@ function createClass() {
 
   const successHandler = () => {
     console.log('Server responded successfully');
+
+    // Clear input fields
     classNameInput.value = '';
     classSubjectInput.value = '';
     classYearlevelInput.value = '';
+    
     hideCreateClassModal();
     loadClasses();
     showToast('Class created successfully!', 3000);
+    
+    // Restore button state
     createButton.disabled = false;
     spinner.classList.add('hidden');
     spinner.classList.remove('visible'); 
@@ -170,6 +151,8 @@ function createClass() {
     console.error('Error:', error);
     showToast(error.message, 5000);
     classNameInput.focus();
+    
+    // Restore button state
     createButton.disabled = false;
     spinner.classList.add('hidden');
     spinner.classList.remove('visible'); 
@@ -241,14 +224,13 @@ function showExpandedView(event, cls) {
     console.error("Expanded header element not found.");
   }
 
+  // Populate expanded view with class details
   document.getElementById('expandedClassName').textContent = cls?.classname || 'Unnamed Class';
   document.getElementById('expandedSubject').textContent = cls?.subject || 'Not specified';
   document.getElementById('expandedYearlevel').textContent = cls?.yearlevel || 'Not specified';
   document.getElementById('expandedClassId').textContent = cls?.classid || '';
   document.getElementById('expandedOwner').textContent = cls?.owner || '';
   document.getElementById('expandedCreated').textContent = cls?.created || '';
-
-  loadSlo();
 
   expandedView.style.transition = 'opacity 0.3s ease';
   classGrid.style.transition = 'opacity 0.3s ease';
@@ -265,11 +247,13 @@ function showExpandedView(event, cls) {
     console.error("Navigation element not found.");
   }
 
+  // Ensure the menu is closed when a new class is expanded
   const menuList = document.querySelector('.expanded-menu-list');
   if (menuList) {
     menuList.classList.add('hidden');
   }
 }
+
 
 function closeExpandedView() {
   document.querySelector('.gc-create-class').style.display = 'block';
@@ -293,6 +277,7 @@ function closeExpandedView() {
 
   expandedView.style.opacity = '0';
 
+  // Close the archive menu
   const menuList = document.querySelector('.expanded-menu-list');
   if (menuList) {
     menuList.classList.add('hidden');
@@ -303,6 +288,7 @@ function closeExpandedView() {
     classGrid.style.opacity = '1';
   }, 300);
 }
+
 
 function showArchiveConfirmation() {
   if (!currentExpandedClass) return;
@@ -316,6 +302,9 @@ function showArchiveConfirmation() {
   const confirmButton = document.getElementById('confirmArchiveButton');
   confirmButton.onclick = () => {
     archiveClass(currentExpandedClass.classid);
+    // hideArchiveConfirmation();
+    // Close the menu after confirmation
+    document.querySelector('.expanded-menu-list').classList.add('hidden');
   };
   
   modal.style.display = 'flex';
@@ -332,7 +321,66 @@ function hideArchiveConfirmation() {
   }, 300);
 }
 
-function archiveClass(classid) {
+
+function archiveClass3(classid) {
+  if (!classid) {
+    console.error('No class ID provided for archiving');
+    return;
+  }
+
+  const modal = document.getElementById('archiveModal');
+  const confirmButton = document.getElementById('confirmArchiveButton');
+  const cancelButton = document.getElementById('archiveModal').querySelector('button[onclick*="hideArchiveConfirmation"]');
+  const spinner = confirmButton.querySelector('.gc-loading-spinner');
+  const buttonText = confirmButton.querySelector('.button-text');
+
+  // Show spinner, hide text, and disable buttons
+  confirmButton.disabled = true;
+  cancelButton.disabled = true;
+  if (spinner) {
+    spinner.classList.add('visible');
+    spinner.classList.remove('hidden');
+  }
+  if (buttonText) {
+    buttonText.style.display = 'none';
+  }
+
+  google.script.run
+    .withSuccessHandler(() => {
+      showToast('Class archived successfully');
+      
+      // After toast message, close modal and restore button states
+      setTimeout(() => {
+        hideArchiveConfirmation();
+        confirmButton.disabled = false;
+        cancelButton.disabled = false;
+        if (spinner) {
+          spinner.classList.add('hidden');
+          spinner.classList.remove('visible');
+        }
+        if (buttonText) {
+          buttonText.style.display = 'inline-block';
+        }
+      }, 2000); // Wait for 2 seconds for toast to be visible
+    })
+    .withFailureHandler(error => {
+      showToast('Archive failed: ' + error.message, 5000);
+      
+      // Restore button state on failure
+      confirmButton.disabled = false;
+      cancelButton.disabled = false;
+      if (spinner) {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('visible');
+      }
+      if (buttonText) {
+        buttonText.style.display = 'inline-block';
+      }
+    })
+    .archiveClass(classid);
+}
+
+function archiveClass5(classid) {
   if (!classid) {
     console.error('No class ID provided for archiving');
     return;
@@ -344,9 +392,10 @@ function archiveClass(classid) {
   const spinner = confirmButton.querySelector('.gc-loading-spinner');
   const buttonText = confirmButton.querySelector('.button-text');
 
+  // Show spinner, hide text, and disable buttons
   confirmButton.disabled = true;
   if (cancelButton) {
-    cancelButton.disabled = true;
+    cancelButton.disabled = true; // Disable cancel button if it exists
   }
   if (spinner) {
     spinner.classList.add('visible');
@@ -359,10 +408,13 @@ function archiveClass(classid) {
   google.script.run
     .withSuccessHandler(() => {
       showToast('Class archived successfully');
+      
+      // After toast message, close modal and restore button states
       setTimeout(() => {
-        hideArchiveConfirmation();
-        closeExpandedView();
-        loadClasses();
+        hideArchiveConfirmation(); // Close the confirmation modal
+        closeExpandedView(); // Close the expanded view
+        loadClasses(); // Refresh the class list
+        // Restore button state after success
         confirmButton.disabled = false;
         if (cancelButton) {
           cancelButton.disabled = false;
@@ -374,10 +426,12 @@ function archiveClass(classid) {
         if (buttonText) {
           buttonText.style.display = 'inline-block';
         }
-      }, 2000);
+      }, 2000); // Wait for 2 seconds for toast to be visible
     })
     .withFailureHandler(error => {
       showToast('Archive failed: ' + error.message, 5000);
+      
+      // On failure, keep modal open but restore button functionality
       confirmButton.disabled = false;
       if (cancelButton) {
         cancelButton.disabled = false;
@@ -393,10 +447,132 @@ function archiveClass(classid) {
     .archiveClass(classid);
 }
 
+function archiveClass(classid) {
+  if (!classid) {
+    console.error('No class ID provided for archiving');
+    return;
+  }
+
+  const modal = document.getElementById('archiveModal');
+  const confirmButton = document.getElementById('confirmArchiveButton');
+  const cancelButton = modal.querySelector('button[onclick*="hideArchiveConfirmation"]');
+  const spinner = confirmButton.querySelector('.gc-loading-spinner');
+  const buttonText = confirmButton.querySelector('.button-text');
+
+  // Show spinner, hide text, and disable buttons
+  confirmButton.disabled = true;
+  if (cancelButton) {
+    cancelButton.disabled = true; // Disable cancel button if it exists
+  }
+  if (spinner) {
+    spinner.classList.add('visible');
+    spinner.classList.remove('hidden');
+  }
+  if (buttonText) {
+    buttonText.style.display = 'none';
+  }
+
+  google.script.run
+    .withSuccessHandler(() => {
+      showToast('Class archived successfully');
+      
+      // Keep the modal open until toast is shown
+      setTimeout(() => {
+        // Close the confirmation modal after toast message is shown
+        hideArchiveConfirmation();
+        // Close expanded view and refresh class list
+        closeExpandedView();
+        loadClasses();
+        // Restore button state after success
+        confirmButton.disabled = false;
+        if (cancelButton) {
+          cancelButton.disabled = false;
+        }
+        if (spinner) {
+          spinner.classList.add('hidden');
+          spinner.classList.remove('visible');
+        }
+        if (buttonText) {
+          buttonText.style.display = 'inline-block';
+        }
+      }, 2000); // Wait for 2 seconds for toast to be visible
+    })
+    .withFailureHandler(error => {
+      showToast('Archive failed: ' + error.message, 5000);
+      
+      // On failure, keep modal open but restore button functionality
+      confirmButton.disabled = false;
+      if (cancelButton) {
+        cancelButton.disabled = false;
+      }
+      if (spinner) {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('visible');
+      }
+      if (buttonText) {
+        buttonText.style.display = 'inline-block';
+      }
+    })
+    .archiveClass(classid);
+}
+
+function archiveClass1(classid) {
+  if (!classid) {
+    console.error('No class ID provided for archiving');
+    return;
+  }
+
+  const confirmButton = document.getElementById('confirmArchiveButton');
+  const spinner = confirmButton.querySelector('.gc-loading-spinner');
+  const buttonText = confirmButton.querySelector('.button-text');
+
+  // Show spinner & disable button
+  confirmButton.disabled = true;
+  if (spinner) {
+    spinner.classList.add('visible');
+    spinner.classList.remove('hidden');
+  }
+  if (buttonText) {
+    buttonText.style.display = 'none';
+  }
+
+  google.script.run
+    .withSuccessHandler(() => {
+      showToast('Class archived successfully');
+      closeExpandedView();
+      loadClasses(); 
+      // Restore button state after success
+      confirmButton.disabled = false;
+      if (spinner) {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('visible');
+      }
+      if (buttonText) {
+        buttonText.style.display = 'inline-block';
+      }
+    })
+    .withFailureHandler(error => {
+      showToast('Archive failed: ' + error.message, 5000);
+      // Restore button state on failure
+      confirmButton.disabled = false;
+      if (spinner) {
+        spinner.classList.add('hidden');
+        spinner.classList.remove('visible');
+      }
+      if (buttonText) {
+        buttonText.style.display = 'inline-block';
+      }
+    })
+    .archiveClass(classid);
+}
+
+
 function resetCreateClassForm() {
+  // Clear text fields
   document.getElementById('classNameInput').value = '';
   document.getElementById('classSubjectInput').value = '';
   
+  // Reset MDC text field states
   const textFields = document.querySelectorAll('.mdc-text-field');
   textFields.forEach(field => {
     field.classList.remove('mdc-text-field--focused');
@@ -404,6 +580,7 @@ function resetCreateClassForm() {
     label.classList.remove('mdc-floating-label--float-above');
   });
 
+  // Reset select component
   const select = document.querySelector('.mdc-select');
   if (select) {
     const mdcSelect = new mdc.select.MDCSelect(select);
@@ -414,26 +591,28 @@ function resetCreateClassForm() {
 }
 
 function toggleMenu(event) {
-  const menuList = event.currentTarget.querySelector('.menu-list');
-  menuList.style.display = menuList.style.display === 'block' ? 'none' : 'block';
-}
+      const menuList = event.currentTarget.querySelector('.menu-list');
+      menuList.style.display = menuList.style.display === 'block' ? 'none' : 'block';
+    }
 
-function toggleAppsList() {
-  const appsList = document.getElementById('appsList');
-  appsList.style.display = appsList.style.display === 'block' ? 'none' : 'block';
-}
+    function toggleAppsList() {
+      const appsList = document.getElementById('appsList');
+      appsList.style.display = appsList.style.display === 'block' ? 'none' : 'block';
+    }
 
-function toggleExpandedMenu(event) {
-  event.stopPropagation();
-  const menuContainer = event.target.closest('.expanded-menu-container');
-  const menuList = menuContainer.querySelector('.expanded-menu-list');
-  menuList.classList.toggle('hidden');
-}
+    // Placeholder for toggleExpandedMenu function
+    function toggleExpandedMenu(event) {
+      event.stopPropagation();
+      const menuContainer = event.target.closest('.expanded-menu-container');
+      const menuList = menuContainer.querySelector('.expanded-menu-list');
+      menuList.classList.toggle('hidden');
+    }
 
+// Export functions to global scope
 window.loadClasses = loadClasses;
 window.showExpandedView = showExpandedView;
-window.closeExpandedView = closeExpandedView;
+window.closeExpandedView = closeExpandedView ;
 window.showArchiveConfirmation = showArchiveConfirmation;
-window.hideArchiveConfirmation = hideArchiveConfirmation;
-window.createClass = createClass;
-window.archiveClass = archiveClass;
+window.hideArchiveConfirmation = hideArchiveConfirmation ;
+window.createClass = createClass ;
+window.archiveClass = archiveClass ;
